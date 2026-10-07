@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
-import LikeButton from "@/app/components/LikeButton";
-import CommentSection from "@/app/components/CommentSection";
-import ShareButton from "@/app/components/ShareButton";
+import LikeButton from "@/components/LikeButton";
+import CommentSection from "@/components/CommentSection";
+import ShareButton from "@/components/ShareButton";
 
 export default function CropDetailsPage(){
   const params = useParams();

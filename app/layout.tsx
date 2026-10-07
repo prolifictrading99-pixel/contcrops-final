@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Cairo } from "next/font/google";
 // @ts-expect-error Next.js handles CSS side-effect imports through its generated types.
 import "./globals.css";
-
 const cairo = Cairo({ subsets: ["arabic"], weight: ["400", "600", "700", "900"] });
 
 export const metadata: Metadata = {
