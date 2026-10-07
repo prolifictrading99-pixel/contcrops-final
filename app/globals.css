@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f5f6f1;
+  margin: 0;
+  padding: 0;
+}
+
+/* إخفاء التبويبات اللي تحت بس - مش هنبوظ حاجة تانية */
+.bottom-nav,
+.mobile-bottom-nav,
+nav.mobile-nav {
+  display: none !important;
+}
