@@ -244,7 +244,7 @@ export default function ContCropsPlatform(){
           ].map(tab=>(
             <button key={tab.id} onClick={()=>{setActiveTab(tab.id); setSelectedProfile(null)}} className={`w-full h-12 flex items-center gap-3 px-4 rounded-xl text-sm font-bold ${activeTab===tab.id && !selectedProfile ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"}`}>
               <span className="text-lg">{tab.icon}</span>{tab.label}
-              {tab.badge>0 && <span className="mr-auto bg-red-500 text-white text-[11px] px-2 py-0.5 rounded-full">{tab.badge}</span>}
+              {(tab.badge||0)>0 && <span className="mr-auto bg-red-500 text-white text-[11px] px-2 py-0.5 rounded-full">{tab.badge||0}</span>}
             </button>
           ))}
           <button onClick={()=>setActiveTab("add")} className="w-full h-12 flex items-center gap-3 px-4 rounded-xl text-sm font-bold mt-4 bg-emerald-600 text-white">
