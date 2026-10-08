@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase";
 
 export default function ShareButton({ cropId, ownerPhone }: { cropId:string, ownerPhone:string }){
   const [count, setCount] = useState(0);

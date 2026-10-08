@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase";
 
 export default function LikeButton({ cropId, ownerPhone }: { cropId: string, ownerPhone: string }){
   const [liked, setLiked] = useState(false);
