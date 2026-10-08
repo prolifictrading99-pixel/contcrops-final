@@ -372,6 +372,51 @@ export default function ContCropsPlatform(){
                   ))}
                 </div>
               )}
+              {activeTab==="messages" && (
+                <div className="bg-white rounded-[24px] border border-slate-100 overflow-hidden flex h-[600px] max-w-[1000px] mx-auto">
+                  <div className="w-[300px] border-l border-slate-100 flex flex-col">
+                    <div className="p-4 border-b border-slate-100 font-bold flex items-center justify-between">
+                      <span>الرسائل</span>
+                      <span className="text-[11px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">{messages.length}</span>
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                      {messages.map((m:any,i:number)=>(
+                        <button key={m.id} onClick={()=>setActiveChat(i)} className={`w-full p-4 flex gap-3 text-right hover:bg-slate-50 border-b border-slate-50 ${activeChat===i?"bg-slate-50":""}`}>
+                          <img src={m.with.avatar} className="w-10 h-10 rounded-full"/>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold truncate">{m.with.name}</p>
+                            <p className="text-xs text-slate-500 truncate">{m.last}</p>
+                          </div>
+                          {m.unread>0 && <span className="w-5 h-5 bg-emerald-600 text-white rounded-full text-[10px] flex items-center justify-center">{m.unread}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex-1 flex flex-col">
+                    {messages[activeChat] && (
+                      <>
+                        <div className="p-4 border-b border-slate-100 flex items-center gap-3">
+                          <img src={messages[activeChat].with.avatar} className="w-9 h-9 rounded-full"/>
+                          <div>
+                            <p className="font-bold text-sm">{messages[activeChat].with.name}</p>
+                            <p className="text-[11px] text-emerald-600">● متصل الآن</p>
+                          </div>
+                          <button className="mr-auto w-8 h-8 bg-slate-50 rounded-full">📞</button>
+                        </div>
+                        <div className="flex-1 p-4 space-y-3 overflow-y-auto bg-[#f8fafc]">
+                          {messages[activeChat].chat.map((msg:any, idx:number)=>(
+                            <div key={idx} className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${msg.from==="me"?"bg-slate-900 text-white mr-auto rounded-br-sm":"bg-white border ml-auto rounded-bl-sm shadow-sm"}`}>{msg.text}</div>
+                          ))}
+                        </div>
+                        <div className="p-3 border-t border-slate-100 flex gap-2 bg-white">
+                          <input value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter" && chatInput.trim()){ const nm=[...messages]; nm[activeChat].chat.push({from:"me",text:chatInput}); nm[activeChat].last=chatInput; setMessages(nm); setChatInput(""); pushNotification({type:"message", title:"رسالة", body:`أرسلت: ${chatInput.slice(0,30)}`, icon:"💬"}); if(isSupabaseConfigured()){ supabase.from("messages").insert({sender_id:1, receiver_id:messages[activeChat].with.id, text:chatInput}).then(()=>{}) } }}} placeholder="اكتب رسالة..." className="flex-1 h-11 px-4 bg-slate-50 border border-slate-100 rounded-full text-sm outline-none focus:bg-white focus:border-emerald-200"/>
+                          <button onClick={()=>{ if(!chatInput.trim()) return; const nm=[...messages]; nm[activeChat].chat.push({from:"me",text:chatInput}); nm[activeChat].last=chatInput; setMessages(nm); pushNotification({type:"message", title:"رسالة", body:`أرسلت: ${chatInput.slice(0,30)}`, icon:"💬"}); if(isSupabaseConfigured()){ supabase.from("messages").insert({sender_id:1, receiver_id:messages[activeChat].with.id, text:chatInput}).then(()=>{}) } setChatInput("") }} className="h-11 px-5 bg-slate-900 text-white rounded-full text-sm font-bold hover:bg-black">إرسال</button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
               {activeTab==="discussions" && (
                 <div className="max-w-[640px] mx-auto space-y-4">
                   <div className="bg-white rounded-[24px] border border-slate-100 p-5">

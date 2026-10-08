@@ -1,28 +1,24 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-// Supabase الجديد بيستخدم sb_publishable_ والمشروع القديم بيستخدم anon key - ندعم الاتنين
 const supabaseKey = 
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 
   ''
 
-const isConfigured = !!supabaseUrl && !!supabaseKey
+// Valid dummy JWT for build - won't work for real requests but won't crash build
+const DUMMY_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDM0NjQzOTIsImV4cCI6MTk1OTA0MDM5Mn0.fake-signature'
 
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder',
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    }
+const finalUrl = supabaseUrl || 'https://placeholder.supabase.co'
+const finalKey = supabaseKey || DUMMY_KEY
+
+const isConfigured = !!supabaseUrl && !!supabaseKey && supabaseUrl.includes('supabase.co')
+
+export const supabase = createClient(finalUrl, finalKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
   }
-)
+})
 
 export const isSupabaseConfigured = () => isConfigured
-
-// Helper للـ debug
-if (typeof window !== 'undefined') {
-  console.log('Supabase configured:', isConfigured, 'URL:', supabaseUrl ? '✅' : '❌', 'Key:', supabaseKey ? supabaseKey.slice(0,20)+'...' : '❌')
-}
