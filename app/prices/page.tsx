@@ -23,7 +23,7 @@ export default function PricesPage(){
   return (
     <main dir="rtl" className="min-h-screen bg-[#f8fdf8] pb-24">
       <div className="bg-white border-b p-3 max-w-5xl mx-auto flex justify-between">
-        <Link href="/market" className="text-xs bg-gray-100 px-3 py-1.5 rounded-full">← السوق</Link>
+        <Link href="/" className="text-xs bg-gray-100 px-3 py-1.5 rounded-full">← السوق</Link>
         <h1 className="font-black text-sm">الأسعار اليوم 📊</h1>
         <div className="w-12"></div>
       </div>

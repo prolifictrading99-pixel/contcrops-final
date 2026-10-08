@@ -77,9 +77,9 @@ export default function MessagesWithProfile() {
           <div className="flex items-center gap-2">
             <Link href="/profile" className="w-8 h-8 bg-[#2e7d32] rounded-full flex items-center justify-center text-white font-bold text-[12px]">أ</Link>
             <Link href="/messages" className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center">✉️</Link>
-            <Link href="/market" className="w-8 h-8 bg-[#f0f1ed] rounded-full flex items-center justify-center">🏠</Link>
+            <Link href="/" className="w-8 h-8 bg-[#f0f1ed] rounded-full flex items-center justify-center">🏠</Link>
           </div>
-          <Link href="/market" className="flex items-center gap-2 font-black">ContCrops <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
+          <Link href="/" className="flex items-center gap-2 font-black">ContCrops <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
         </div>
       </header>
 
@@ -90,7 +90,7 @@ export default function MessagesWithProfile() {
             <div><p className="font-black text-[13px]">{me?.name || "hamza"}</p><p className="text-[11px] text-gray-400">مزارع - البحيرة</p></div>
           </div>
           <div className="bg-white rounded-[16px] border border-black/5 p-2">
-            <Link href="/market" className="flex px-4 py-3 text-gray-500 text-[13px] hover:bg-gray-50 rounded-[12px]">🧺 السوق</Link>
+            <Link href="/" className="flex px-4 py-3 text-gray-500 text-[13px] hover:bg-gray-50 rounded-[12px]">🧺 السوق</Link>
             <Link href="/following" className="flex px-4 py-3 text-gray-500 text-[13px] hover:bg-gray-50 rounded-[12px]">👥 خلاصة المتابَعين</Link>
             <Link href="/threed" className="flex px-4 py-3 text-gray-500 text-[13px] hover:bg-gray-50 rounded-[12px]">💬 ثريد</Link>
             <Link href="/messages" className="flex bg-black text-white rounded-[12px] px-4 py-3 font-bold text-[13px]">✉️ الرسائل</Link>
@@ -152,7 +152,7 @@ export default function MessagesWithProfile() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Link href={`/farmer/${encodeURIComponent(selected.name)}`} className="bg-black text-white px-4 py-1.5 rounded-full text-[11px] font-bold hover:bg-zinc-800">بروفايل</Link>
-                    <Link href="/market" className="text-[12px] text-gray-500 hover:text-black">✕</Link>
+                    <Link href="/" className="text-[12px] text-gray-500 hover:text-black">✕</Link>
                   </div>
                 </div>
                 <div className="flex-1 p-4 space-y-3 overflow-y-auto bg-[#fbfaf6]">

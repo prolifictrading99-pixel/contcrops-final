@@ -87,14 +87,14 @@ export default function FarmerCompactImages() {
           <div className="flex items-center gap-2">
             <Link href="/profile" className="w-8 h-8 bg-[#2e7d32] rounded-full flex items-center justify-center text-white font-bold text-[12px]">أ</Link>
             <Link href="/notifications" className="w-8 h-8 bg-[#f0f1ed] rounded-full flex items-center justify-center relative">🔔{unread>0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center">{unread}</span>}</Link>
-            <Link href="/market" className="w-8 h-8 bg-[#f0f1ed] rounded-full flex items-center justify-center">🏠</Link>
+            <Link href="/" className="w-8 h-8 bg-[#f0f1ed] rounded-full flex items-center justify-center">🏠</Link>
           </div>
-          <Link href="/market" className="flex items-center gap-2 font-black">ContCrops <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
+          <Link href="/" className="flex items-center gap-2 font-black">ContCrops <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
         </div>
       </header>
 
       <div className="max-w-[900px] mx-auto px-3 py-4">
-        <Link href="/market" className="inline-flex bg-white border px-4 py-2 rounded-full text-[13px] font-bold mb-4">← رجوع للسوق</Link>
+        <Link href="/" className="inline-flex bg-white border px-4 py-2 rounded-full text-[13px] font-bold mb-4">← رجوع للسوق</Link>
 
         <div className="bg-white rounded-[16px] border border-black/5 p-4 flex gap-4 items-center">
           <div className="w-16 h-16 bg-[#2e7d32] rounded-full flex items-center justify-center text-white font-black text-[20px] shrink-0">{farmer.name[0]}</div>

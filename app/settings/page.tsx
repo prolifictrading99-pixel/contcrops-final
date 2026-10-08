@@ -44,7 +44,7 @@ export default function SettingsPage() {
         <div className="max-w-[600px] mx-auto w-full px-4 flex items-center justify-between">
           <Link href="/profile" className="bg-[#f0f1ed] w-8 h-8 rounded-full flex items-center justify-center">←</Link>
           <h1 className="font-black text-[16px]">⚙️ الإعدادات</h1>
-          <Link href="/market" className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white text-[12px]">C</Link>
+          <Link href="/" className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white text-[12px]">C</Link>
         </div>
       </header>
 

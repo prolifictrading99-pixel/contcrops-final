@@ -39,9 +39,9 @@ export default function FollowingPageFixed() {
     <main dir="rtl" className="min-h-screen bg-[#f5f6f1]">
       <header className="bg-white border-b sticky top-0 z-50 h-[56px] flex items-center">
         <div className="max-w-[1000px] mx-auto w-full px-4 flex items-center justify-between">
-          <Link href="/market" className="bg-[#f0f1ed] w-8 h-8 rounded-full flex items-center justify-center">←</Link>
+          <Link href="/" className="bg-[#f0f1ed] w-8 h-8 rounded-full flex items-center justify-center">←</Link>
           <h1 className="font-black text-[16px]">👥 خلاصة المتابَعين {following.length > 0 && `(${following.length})`}</h1>
-          <Link href="/market" className="flex items-center gap-2 font-black"><span className="text-[14px]">ContCrops</span><div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
+          <Link href="/" className="flex items-center gap-2 font-black"><span className="text-[14px]">ContCrops</span><div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
         </div>
       </header>
 
@@ -57,7 +57,7 @@ export default function FollowingPageFixed() {
               <p className="text-[12px] text-gray-600">2. دوس على اسم أي مزارع</p>
               <p className="text-[12px] text-gray-600">3. دوس "+ متابعة"</p>
             </div>
-            <Link href="/market" className="inline-block mt-6 bg-black text-white px-8 py-3 rounded-full font-bold text-[14px]">روح السوق واكتشف مزارعين 🚀</Link>
+            <Link href="/" className="inline-block mt-6 bg-black text-white px-8 py-3 rounded-full font-bold text-[14px]">روح السوق واكتشف مزارعين 🚀</Link>
           </div>
         ) : (
           <>

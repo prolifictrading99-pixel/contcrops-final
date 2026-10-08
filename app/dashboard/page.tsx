@@ -63,7 +63,7 @@ export default function DashboardPage(){
             <p className="text-xs text-gray-400">مرحباً {user?.name} - {user?.phone} (أدمن)</p>
           </div>
           <div className="flex gap-2">
-            <Link href="/market" className="text-xs bg-gray-100 px-3 py-2 rounded-full">السوق</Link>
+            <Link href="/" className="text-xs bg-gray-100 px-3 py-2 rounded-full">السوق</Link>
             <button onClick={handleLogout} className="text-xs bg-red-50 text-red-600 border border-red-100 px-3 py-2 rounded-full">خروج</button>
           </div>
         </div>

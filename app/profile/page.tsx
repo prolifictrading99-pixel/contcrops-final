@@ -54,7 +54,7 @@ export default function ProfileIsolated() {
     <main dir="rtl" className="min-h-screen bg-[#f5f6f1] pb-[80px]">
       <header className="bg-white border-b sticky top-0 z-50 h-[56px] flex items-center">
         <div className="max-w-[800px] mx-auto w-full px-4 flex items-center justify-between">
-          <Link href="/market" className="bg-[#f0f1ed] w-8 h-8 rounded-full flex items-center justify-center">←</Link>
+          <Link href="/" className="bg-[#f0f1ed] w-8 h-8 rounded-full flex items-center justify-center">←</Link>
           <h1 className="font-black text-[15px]">بروفايل {currentUser} - منفصل 🔒</h1>
           <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div>
         </div>
@@ -113,7 +113,7 @@ export default function ProfileIsolated() {
         {tab==="comments" && (
           <div className="mt-4 space-y-2">
             {myComments.length===0 ? (
-              <div className="bg-white rounded-[16px] border p-8 text-center"><p className="font-bold">لسه معملتش تعليقات بحساب {currentUser}</p><Link href="/market" className="inline-block mt-4 bg-black text-white px-6 py-2.5 rounded-full text-[13px] font-bold">روح علق</Link></div>
+              <div className="bg-white rounded-[16px] border p-8 text-center"><p className="font-bold">لسه معملتش تعليقات بحساب {currentUser}</p><Link href="/" className="inline-block mt-4 bg-black text-white px-6 py-2.5 rounded-full text-[13px] font-bold">روح علق</Link></div>
             ) : myComments.map((c:any)=>(
               <div key={c.id} className="bg-white rounded-[16px] border p-4">
                 <p className="text-[11px] text-gray-500">علقت على {c.postCrop} - بحساب {currentUser}</p>

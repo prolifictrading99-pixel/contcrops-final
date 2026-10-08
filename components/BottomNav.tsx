@@ -15,7 +15,7 @@ export default function BottomNav(){
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-50">
       <div className="max-w-6xl mx-auto flex justify-around py-2">
-        <Link href="/market" className={`flex flex-col items-center ${pathname==="/market"? "text-green-600" : "text-gray-400"}`}>
+        <Link href="/" className={`flex flex-col items-center ${pathname==="/"? "text-green-600" : "text-gray-400"}`}>
           <span className="text-lg">🛒</span><span className="text- font-bold">السوق</span>
         </Link>
         <Link href="/farmers" className={`flex flex-col items-center ${pathname.startsWith("/farmers")? "text-green-600" : "text-gray-400"}`}>

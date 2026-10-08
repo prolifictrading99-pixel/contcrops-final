@@ -19,7 +19,7 @@ export default function LoginIsolated() {
     // لو فيه يوزر حالي مسجل دخول، روح السوق
     const current = localStorage.getItem("contcrops_current_user");
     if (current) {
-      router.push("/market");
+      router.push("/");
     }
   },[]);
 
@@ -64,12 +64,12 @@ export default function LoginIsolated() {
       ]));
     }
     
-    router.push("/market");
+    router.push("/");
   };
 
   const switchToAccount = (accountName: string) => {
     localStorage.setItem("contcrops_current_user", accountName);
-    router.push("/market");
+    router.push("/");
   };
 
   const deleteAccount = (accountName: string) => {

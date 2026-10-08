@@ -22,7 +22,7 @@ export default function RegisterPage(){
     setLoading(false);
     if(error) return alert(error.message);
     localStorage.setItem("contcrops_user", JSON.stringify(data));
-    router.push("/market");
+    router.push("/");
   };
 
   return (

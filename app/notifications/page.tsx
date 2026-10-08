@@ -74,9 +74,9 @@ export default function NotificationsPage() {
     <main dir="rtl" className="min-h-screen bg-[#f5f6f1]">
       <header className="bg-white border-b sticky top-0 z-50 h-[56px] flex items-center">
         <div className="max-w-[1000px] mx-auto w-full px-4 flex items-center justify-between">
-          <Link href="/market" className="bg-[#f0f1ed] w-8 h-8 rounded-full flex items-center justify-center">←</Link>
+          <Link href="/" className="bg-[#f0f1ed] w-8 h-8 rounded-full flex items-center justify-center">←</Link>
           <h1 className="font-black text-[16px]">🔔 الإشعارات {unreadCount>0 && `(${unreadCount} جديدة)`}</h1>
-          <Link href="/market" className="flex items-center gap-2 font-black">ContCrops <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
+          <Link href="/" className="flex items-center gap-2 font-black">ContCrops <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
         </div>
       </header>
 
@@ -104,7 +104,7 @@ export default function NotificationsPage() {
             <p className="text-[50px]">🔕</p>
             <h2 className="font-black text-[16px] mt-3">مفيش إشعارات</h2>
             <p className="text-[13px] text-gray-500 mt-2">لما حد يعمل لايك أو كومنت أو يتابعك هتظهر هنا</p>
-            <Link href="/market" className="inline-block mt-6 bg-black text-white px-6 py-2.5 rounded-full text-[13px] font-bold">روح السوق</Link>
+            <Link href="/" className="inline-block mt-6 bg-black text-white px-6 py-2.5 rounded-full text-[13px] font-bold">روح السوق</Link>
           </div>
         ) : (
           <div className="space-y-2 mt-4">

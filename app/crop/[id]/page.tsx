@@ -21,7 +21,7 @@ export default function CropDetailsPage(){
     <main dir="rtl" className="min-h-screen bg-[#f8fdf8] pb-24">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white border-b p-3 flex justify-between">
-          <Link href="/market" className="text-xs bg-gray-100 px-3 py-1 rounded-full">← السوق</Link>
+          <Link href="/" className="text-xs bg-gray-100 px-3 py-1 rounded-full">← السوق</Link>
           <h1 className="font-black text-sm">{crop.name}</h1>
           <div className="w-12"></div>
         </div>

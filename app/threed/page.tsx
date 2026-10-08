@@ -78,9 +78,9 @@ export default function ThreedRealPosts() {
           <div className="flex items-center gap-2">
             <Link href="/profile" className="w-8 h-8 bg-[#2e7d32] rounded-full flex items-center justify-center text-white font-bold text-[12px]">أ</Link>
             <Link href="/messages" className="w-8 h-8 bg-[#f0f1ed] rounded-full flex items-center justify-center relative">✉️<span className="absolute -top-1 -right-1 bg-[#0a84ff] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">3</span></Link>
-            <Link href="/market" className="w-8 h-8 bg-[#f0f1ed] rounded-full flex items-center justify-center">🏠</Link>
+            <Link href="/" className="w-8 h-8 bg-[#f0f1ed] rounded-full flex items-center justify-center">🏠</Link>
           </div>
-          <Link href="/market" className="flex items-center gap-2 font-black">ContCrops <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
+          <Link href="/" className="flex items-center gap-2 font-black">ContCrops <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white">C</div></Link>
         </div>
       </header>
 
@@ -92,7 +92,7 @@ export default function ThreedRealPosts() {
               <div><p className="font-black text-[13px]">hamza</p><p className="text-[11px] text-gray-400">مزارع - البحيرة</p></div>
             </div>
             <div className="bg-white rounded-[16px] border border-black/5 p-2">
-              <Link href="/market" className="flex px-4 py-3 text-gray-500 text-[13px] hover:bg-gray-50 rounded-[12px]">🧺 السوق</Link>
+              <Link href="/" className="flex px-4 py-3 text-gray-500 text-[13px] hover:bg-gray-50 rounded-[12px]">🧺 السوق</Link>
               <Link href="/threed" className="flex bg-black text-white rounded-[12px] px-4 py-3 font-bold text-[13px]">💬 ثريد</Link>
               <Link href="/messages" className="flex px-4 py-3 text-gray-500 text-[13px] hover:bg-gray-50 rounded-[12px]">✉️ الرسائل</Link>
               <Link href="/profile" className="flex px-4 py-3 text-gray-500 text-[13px] hover:bg-gray-50 rounded-[12px]">👤 الملف الشخصي</Link>
