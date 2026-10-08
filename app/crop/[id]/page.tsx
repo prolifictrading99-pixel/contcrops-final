@@ -1,43 +1,139 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
-import Link from "next/link";
-import LikeButton from "@/components/LikeButton";
-import CommentSection from "@/components/CommentSection";
-import ShareButton from "@/components/ShareButton";
+"use client"
+import { useState } from "react"
+import Link from "next/link"
+import { useParams, useRouter } from "next/navigation"
 
-export default function CropDetailsPage(){
-  const params = useParams();
-  const [crop, setCrop] = useState<any>(null);
+const CROPS_MOCK = [
+  {id:1, name:"طماطم بلدي", farmer:"أحمد المزارع", farmer_id:1, city:"المنصورة", price:"12 جنيه/ك", qty:"5 طن", category:"فريش", img:"https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600", avatar:"https://i.pravatar.cc/100?img=12", verified:true, likes:24, comments:5, desc:"طماطم بلدي طازجة من مزارع المنصورة، جودة عالية، بدون مبيدات. متاحة للتوصيل خلال 24 ساعة. الكمية 5 طن قابلة للزيادة."},
+  {id:2, name:"مانجو عويس", farmer:"محمد الفكهاني", farmer_id:2, city:"الإسماعيلية", price:"35 جنيه/ك", qty:"2 طن", category:"فريش", img:"https://images.unsplash.com/photo-1553279768-865429fa0078?w=600", avatar:"https://i.pravatar.cc/100?img=15", verified:true, likes:42, comments:8, desc:"مانجو عويس إسماعيلية درجة أولى، طعم سكري، حجم كبير."},
+  {id:3, name:"قمح مجفف", farmer:"حسن الحبوب", farmer_id:3, city:"الشرقية", price:"18 جنيه/ك", qty:"10 طن", category:"مجفف", img:"https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600", avatar:"https://i.pravatar.cc/100?img=20", verified:false, likes:18, comments:2, desc:"قمح مجفف مجفف على الشمس، نسبة رطوبة أقل من 12%."},
+  {id:4, name:"خدمة نقل مبرد", farmer:"سعيد للنقل", farmer_id:4, city:"الفيوم", price:"4 جنيه/ك", qty:"20 طن", category:"نقل ولوجيستك", img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600", avatar:"https://i.pravatar.cc/100?img=33", verified:true, likes:31, comments:4, desc:"خدمة نقل مبرد من الفيوم لجميع المحافظات، شاحنات مجهزة تبريد -18."},
+]
 
-  useEffect(()=>{
-    supabase.from("crops").select("*").eq("id", params.id).single().then(r=> setCrop(r.data));
-  },[params.id]);
+const COLLEAGUES_MOCK = [
+  {id:1, name:"أحمد المزارع", city:"المنصورة", crops:24, followers:120, following:80, rating:4.9, avatar:"https://i.pravatar.cc/100?img=12", specialty:"فريش", bio:"مزارع خضروات خبرة 15 سنة", cover:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800"},
+  {id:2, name:"محمد الفكهاني", city:"الإسماعيلية", crops:32, followers:210, rating:5.0, avatar:"https://i.pravatar.cc/100?img=15", specialty:"فريش", bio:"فواكه طازجة يوميا", cover:"https://images.unsplash.com/photo-1553279768-865429fa0078?w=800"},
+  {id:3, name:"حسن الحبوب", city:"الشرقية", crops:12, followers:60, rating:4.7, avatar:"https://i.pravatar.cc/100?img=20", specialty:"مجفف", bio:"حبوب عالية الجودة", cover:"https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800"},
+  {id:4, name:"سعيد للنقل", city:"الفيوم", crops:8, followers:45, rating:4.8, avatar:"https://i.pravatar.cc/100?img=33", specialty:"نقل ولوجيستك", bio:"خدمات نقل مبرد", cover:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800"},
+]
 
-  if(!crop) return <div className="p-10 text-center">جاري التحميل...</div>;
-
+export default function CropDetailPage(){
+  const params = useParams()
+  const router = useRouter()
+  const id = Number(params.id)
+  const crop = CROPS_MOCK.find(c=>c.id===id) || CROPS_MOCK[0]
+  const farmer = COLLEAGUES_MOCK.find(f=>f.id===crop.farmer_id) || COLLEAGUES_MOCK[0]
+  const [liked, setLiked] = useState(false)
+  const [likes, setLikes] = useState(crop.likes)
+  const [toast, setToast] = useState("")
+  const [newComment, setNewComment] = useState("")
+  const [commentsList, setCommentsList] = useState([
+    {id:1, name:"محمد", avatar:"https://i.pravatar.cc/100?img=8", text:"الجودة ممتازة، تعاملت معاه قبل كده", time:"منذ ساعتين"},
+    {id:2, name:"فاطمة", avatar:"https://i.pravatar.cc/100?img=26", text:"لسه متاح؟", time:"منذ 3 ساعات"},
+  ])
+  const showToast = (msg:string)=>{ setToast(msg); setTimeout(()=>setToast(""),2500) }
+  const handleContact = ()=>{
+    localStorage.setItem("contcrops_chat_with", JSON.stringify(farmer))
+    localStorage.setItem("contcrops_chat_crop", JSON.stringify(crop))
+    router.push("/?chat="+farmer.id)
+  }
   return (
-    <main dir="rtl" className="min-h-screen bg-[#f8fdf8] pb-24">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white border-b p-3 flex justify-between">
-          <Link href="/" className="text-xs bg-gray-100 px-3 py-1 rounded-full">← السوق</Link>
-          <h1 className="font-black text-sm">{crop.name}</h1>
-          <div className="w-12"></div>
+    <div dir="rtl" className="min-h-screen bg-[#f8fafc]">
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
+        <div className="max-w- mx-auto px-4 h- flex items-center gap-4">
+          <Link href="/" className="h-9 px-4 bg-white border rounded-full text-sm font-bold flex items-center">← رجوع للسوق</Link>
+          <div className="flex items-center gap-2 font-extrabold text-lg">🌿 ContCrops</div>
+          <div className="mr-auto flex gap-2">
+            <button onClick={()=>{navigator.clipboard.writeText(window.location.href); showToast("تم نسخ الرابط")}} className="h-9 px-4 bg-slate-50 border rounded-full text-sm">↗️ مشاركة</button>
+            <button onClick={()=>{setLiked(!liked); setLikes(liked?likes-1:likes+1)}} className={`h-9 px-4 rounded-full text-sm font-bold ${liked?"bg-red-50 text-red-500 border border-red-200":"bg-slate-900 text-white"}`}>❤️ {likes}</button>
+          </div>
         </div>
-        <img src={crop.image_url} className="w-full h-64 object-cover" />
-        <div className="p-4 space-y-3">
-          <div className="bg-white border rounded-2xl p-4">
-            <h2 className="font-black">{crop.name}</h2>
-            <p className="text-green-600 font-black mt-1">{crop.price} جنيه</p>
-            <div className="flex gap-2 mt-3">
-              <LikeButton cropId={crop.id} ownerPhone={crop.farmer_phone} />
-              <ShareButton cropId={crop.id} ownerPhone={crop.farmer_phone} />
+      </header>
+      <main className="max-w- mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+        <div className="space-y-5">
+          <div className="bg-white rounded- border border-slate-100 overflow-hidden">
+            <div className="relative h- bg-slate-50">
+              <img src={crop.img} className="w-full h-full object-contain p-2"/>
+              <div className="absolute top-4 right-4 flex gap-2">
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur rounded-full text-xs font-bold">{crop.category}</span>
+                {crop.verified && <span className="w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs">✓</span>}
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl font-extrabold">{crop.name}</h1>
+                  <p className="text-sm text-slate-500 mt-1">📍 {crop.city} • {crop.qty} • منذ ساعتين</p>
+                </div>
+                <div className="text-left">
+                  <p className="text-2xl font-extrabold text-emerald-700">{crop.price}</p>
+                  <p className="text-xs text-slate-500">سعر الكيلو</p>
+                </div>
+              </div>
+              <div className="mt-6 p-4 bg-slate-50 rounded-2xl">
+                <h3 className="font-bold text-sm mb-2">الوصف</h3>
+                <p className="text- leading-7 text-slate-700">{crop.desc}</p>
+                <div className="grid grid-cols-3 gap-3 mt-4">
+                  <div className="bg-white rounded-xl p-3 border text-center"><p className="text-xs text-slate-500">الكمية</p><p className="font-bold text-sm mt-1">{crop.qty}</p></div>
+                  <div className="bg-white rounded-xl p-3 border text-center"><p className="text-xs text-slate-500">الفئة</p><p className="font-bold text-sm mt-1">{crop.category}</p></div>
+                  <div className="bg-white rounded-xl p-3 border text-center"><p className="text-xs text-slate-500">المدينة</p><p className="font-bold text-sm mt-1">{crop.city}</p></div>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button onClick={handleContact} className="flex-1 h-12 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800">تواصل مع المزارع 💬</button>
+                <button onClick={()=>showToast("تمت الإضافة للمفضلة")} className="h-12 px-6 bg-white border rounded-full font-bold">♡ حفظ</button>
+              </div>
             </div>
           </div>
-          <CommentSection cropId={crop.id} ownerPhone={crop.farmer_phone} />
+          <div className="bg-white rounded- border p-6">
+            <h3 className="font-bold mb-4">التعليقات ({commentsList.length})</h3>
+            <div className="flex gap-3 mb-5">
+              <img src="https://i.pravatar.cc/100?img=12" className="w-9 h-9 rounded-full"/>
+              <div className="flex-1 flex gap-2">
+                <input value={newComment} onChange={e=>setNewComment(e.target.value)} placeholder="اكتب تعليق..." className="flex-1 h-11 px-4 bg-slate-50 border rounded-full text-sm"/>
+                <button onClick={()=>{if(newComment.trim()){setCommentsList([{id:Date.now(), name:"أنت", avatar:"https://i.pravatar.cc/100?img=12", text:newComment, time:"الآن"},...commentsList]); setNewComment("")}}} className="h-11 px-5 bg-slate-900 text-white rounded-full text-sm font-bold">إرسال</button>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {commentsList.map(c=>(
+                <div key={c.id} className="flex gap-3">
+                  <img src={c.avatar} className="w-8 h-8 rounded-full"/>
+                  <div className="flex-1 bg-slate-50 rounded-2xl rounded-br-sm px-4 py-2.5">
+                    <p className="text- font-bold">{c.name} <span className="text- font-normal text-slate-500">• {c.time}</span></p>
+                    <p className="text- mt-1">{c.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+        <div className="space-y-5">
+          <div className="bg-white rounded- border overflow-hidden">
+            <div className="h-24 bg-slate-200 relative"><img src={farmer.cover} className="w-full h-full object-cover"/></div>
+            <div className="p-5">
+              <div className="flex gap-3">
+                <Link href="/"><img src={farmer.avatar} className="w-14 h-14 rounded-full border-2 border-white -mt-10"/></Link>
+                <div className="flex-1 -mt-1">
+                  <Link href="/" className="font-extrabold hover:underline">{farmer.name}</Link>
+                  <p className="text-xs text-slate-500">{farmer.city} • {farmer.specialty}</p>
+                </div>
+                <span className="w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-">✓</span>
+              </div>
+              <p className="text- text-slate-600 mt-3">{farmer.bio}</p>
+              <div className="flex gap-4 mt-4 text-">
+                <span><b>{farmer.crops}</b> محصول</span>
+                <span><b>{farmer.followers}</b> متابع</span>
+                <span>⭐ {farmer.rating}</span>
+              </div>
+              <div className="flex gap-2 mt-5">
+                <button onClick={handleContact} className="flex-1 h-10 bg-slate-900 text-white rounded-full text-sm font-bold">مراسلة 💬</button>
+                <Link href="/" className="flex-1 h-10 bg-white border rounded-full text-sm font-bold flex items-center justify-center">عرض البروفايل</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      {toast && <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-bold z-[90]">{toast}</div>}
+    </div>
   )
 }

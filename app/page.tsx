@@ -1,12 +1,13 @@
 "use client"
 import { useState, useEffect } from "react"
+import Link from "next/link"
 
 // MOCK DATA - هتتبدل بـ Supabase بعدين
 const CROPS_MOCK = [
-  {id:1, name:"طماطم بلدي", farmer:"أحمد المزارع", farmer_id:1, city:"المنصورة", price:"12 جنيه/ك", qty:"5 طن", category:"خضروات", img:"https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600", avatar:"https://i.pravatar.cc/100?img=12", verified:true, likes:24, comments:5, liked:false, showComments:false, commentsList:[{id:1,name:"محمد",text:"الجودة ممتازة",time:"ساعتين"}]},
-  {id:2, name:"مانجو عويس", farmer:"محمد الفكهاني", farmer_id:2, city:"الإسماعيلية", price:"35 جنيه/ك", qty:"2 طن", category:"فواكه", img:"https://images.unsplash.com/photo-1553279768-865429fa0078?w=600", avatar:"https://i.pravatar.cc/100?img=15", verified:true, likes:42, comments:8, liked:false, showComments:false, commentsList:[]},
-  {id:3, name:"قمح جيزة", farmer:"حسن الحبوب", farmer_id:3, city:"الشرقية", price:"18 جنيه/ك", qty:"10 طن", category:"حبوب", img:"https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600", avatar:"https://i.pravatar.cc/100?img=20", verified:false, likes:18, comments:2, liked:false, showComments:false, commentsList:[]},
-  {id:4, name:"برسيم حجازي", farmer:"سعيد الأعلاف", farmer_id:4, city:"الفيوم", price:"4 جنيه/ك", qty:"20 طن", category:"أعلاف", img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600", avatar:"https://i.pravatar.cc/100?img=33", verified:true, likes:31, comments:4, liked:false, showComments:false, commentsList:[]},
+  {id:1, name:"طماطم بلدي", farmer:"أحمد المزارع", farmer_id:1, city:"المنصورة", price:"12 جنيه/ك", qty:"5 طن", category:"فريش", img:"https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600", avatar:"https://i.pravatar.cc/100?img=12", verified:true, likes:24, comments:5, liked:false, showComments:false, commentsList:[{id:1,name:"محمد",text:"الجودة ممتازة",time:"ساعتين"}]},
+  {id:2, name:"مانجو عويس", farmer:"محمد الفكهاني", farmer_id:2, city:"الإسماعيلية", price:"35 جنيه/ك", qty:"2 طن", category:"فريش", img:"https://images.unsplash.com/photo-1553279768-865429fa0078?w=600", avatar:"https://i.pravatar.cc/100?img=15", verified:true, likes:42, comments:8, liked:false, showComments:false, commentsList:[]},
+  {id:3, name:"قمح مجفف", farmer:"حسن الحبوب", farmer_id:3, city:"الشرقية", price:"18 جنيه/ك", qty:"10 طن", category:"مجفف", img:"https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600", avatar:"https://i.pravatar.cc/100?img=20", verified:false, likes:18, comments:2, liked:false, showComments:false, commentsList:[]},
+  {id:4, name:"خدمة نقل مبرد", farmer:"سعيد للنقل", farmer_id:4, city:"الفيوم", price:"4 جنيه/ك", qty:"20 طن", category:"نقل ولوجيستك", img:"https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600", avatar:"https://i.pravatar.cc/100?img=33", verified:true, likes:31, comments:4, liked:false, showComments:false, commentsList:[]},
 ]
 
 const COLLEAGUES_MOCK = [
@@ -35,7 +36,7 @@ export default function ContCropsPlatform(){
   const [following, setFollowing] = useState<number[]>([1,2])
   const [toast, setToast] = useState("")
   const [newComment, setNewComment] = useState("")
-  const [newPost, setNewPost] = useState({name:"", city:"", price:"", qty:"", category:"خضروات", desc:""})
+  const [newPost, setNewPost] = useState({name:"", city:"", price:"", qty:"", category:"فريش", desc:""})
   const [messages, setMessages] = useState([
     {id:1, with:COLLEAGUES_MOCK[0], last:"الطماطم وصلت؟", unread:2, chat:[{from:"them",text:"الطماطم وصلت؟"},{from:"me",text:"ايوه في الطريق"}]},
     {id:2, with:COLLEAGUES_MOCK[1], last:"الشتلات جاهزة", unread:0, chat:[{from:"them",text:"الشتلات جاهزة"}]},
@@ -43,7 +44,44 @@ export default function ContCropsPlatform(){
   const [activeChat, setActiveChat] = useState(0)
   const [chatInput, setChatInput] = useState("")
 
-  const CATS = ["الكل","خضروات","فواكه","حبوب","أعلاف","بقوليات","نباتات طبية","شتلات","أسمدة"]
+  // تفعيل المراسلة من صفحة التفاصيل
+  useEffect(()=>{
+    const params = new URLSearchParams(window.location.search)
+    const chatId = params.get("chat")
+    if(chatId){
+      const fid = Number(chatId)
+      // لو المحادثة مش موجودة، أنشئها
+      const existing = messages.findIndex(m=>m.with.id===fid)
+      if(existing===-1){
+        const farmerData = COLLEAGUES_MOCK.find(c=>c.id===fid) || COLLEAGUES_MOCK[0]
+        const newMsg = {id:Date.now(), with:farmerData, last:"مرحبا 👋", unread:0, chat:[{from:"me",text:`مرحبا ${farmerData.name} بخصوص ${CROPS_MOCK.find(c=>c.farmer_id===fid)?.name||"المحصول"}` }]}
+        setMessages(prev=>[newMsg, ...prev])
+        setActiveChat(0)
+      } else {
+        setActiveChat(existing)
+      }
+      setActiveTab("messages")
+      showToast("تم فتح المحادثة")
+      // نظف الـ URL
+      window.history.replaceState({}, "", "/")
+    }
+    // من localStorage كمان
+    const stored = localStorage.getItem("contcrops_chat_with")
+    if(stored && !params.get("chat")){
+      try{
+        const farmerData = JSON.parse(stored)
+        const fid = farmerData.id
+        const existing = messages.findIndex(m=>m.with.id===fid)
+        if(existing===-1){
+          const newMsg = {id:Date.now(), with:farmerData, last:"مرحبا 👋", unread:0, chat:[{from:"me",text:`مرحبا ${farmerData.name}`}]}
+          setMessages(prev=>[newMsg, ...prev])
+        }
+        localStorage.removeItem("contcrops_chat_with")
+      }catch{}
+    }
+  },[])
+
+  const CATS = ["الكل","فريش","مجمد","مجفف","محطات فرز وتعبئة","مستلزمات زراعة","مستلزمات انتاج","نقل ولوجيستك"]
 
   const showToast = (msg:string)=>{ setToast(msg); setTimeout(()=>setToast(""),2500) }
 
@@ -324,7 +362,7 @@ export default function ContCropsPlatform(){
                 <textarea value={newPost.desc} onChange={e=>setNewPost({...newPost,desc:e.target.value})} placeholder="وصف المحصول" className="col-span-2 min-h-[84px] p-4 border rounded-xl"/>
               </div>
               <div className="mt-4 border-2 border-dashed rounded-xl h-32 flex items-center justify-center text-slate-400">+ رفع صورة</div>
-              <button onClick={()=>{const newCrop={id:Date.now(), name:newPost.name||"محصول جديد", farmer:"أحمد المزارع", farmer_id:1, city:newPost.city||"المنصورة", price:newPost.price||"10 ج", qty:newPost.qty||"1 طن", category:newPost.category, img:"https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600", avatar:"https://i.pravatar.cc/100?img=12", verified:true, likes:0, comments:0, liked:false, showComments:false, commentsList:[]}; setCrops([newCrop,...crops]); setActiveTab("market"); showToast("تم نشر المحصول"); setNewPost({name:"",city:"",price:"",qty:"",category:"خضروات",desc:""})}} className="w-full mt-6 h-12 bg-emerald-600 text-white rounded-xl font-bold">نشر</button>
+              <button onClick={()=>{const newCrop={id:Date.now(), name:newPost.name||"محصول جديد", farmer:"أحمد المزارع", farmer_id:1, city:newPost.city||"المنصورة", price:newPost.price||"10 ج", qty:newPost.qty||"1 طن", category:newPost.category, img:"https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600", avatar:"https://i.pravatar.cc/100?img=12", verified:true, likes:0, comments:0, liked:false, showComments:false, commentsList:[]}; setCrops([newCrop,...crops]); setActiveTab("market"); showToast("تم نشر المحصول"); setNewPost({name:"",city:"",price:"",qty:"",category:"فريش",desc:""})}} className="w-full mt-6 h-12 bg-emerald-600 text-white rounded-xl font-bold">نشر</button>
             </div>
           )}
         </div>
@@ -348,10 +386,10 @@ function CropCard({crop, onProfileClick, onLike, onComments, onShare, newComment
   const farmer = colleagues?.find((c:any)=>c.id===crop.farmer_id) || {name:crop.farmer, avatar:crop.avatar, id:crop.farmer_id}
   return (
     <div className="bg-white rounded-[24px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition">
-      <div className="relative h-48 cursor-pointer"><img src={crop.img} alt={crop.name} className="w-full h-full object-cover"/><div className="absolute top-3 right-3 flex gap-2"><span className="px-2.5 py-1 bg-white/90 rounded-full text-[11px] font-bold">{crop.category}</span>{crop.verified && <span className="w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[12px]">✓</span>}</div></div>
+      <Link href={`/crop/${crop.id}`}><div className="relative h-48 cursor-pointer"><img src={crop.img} alt={crop.name} className="w-full h-full object-cover"/><div className="absolute top-3 right-3 flex gap-2"><span className="px-2.5 py-1 bg-white/90 rounded-full text-[11px] font-bold">{crop.category}</span>{crop.verified && <span className="w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-[12px]">✓</span>}</div></div></Link>
       <div className="p-4">
         <div className="flex items-center gap-2 mb-2 cursor-pointer" onClick={()=>onProfileClick && onProfileClick(farmer)}><img src={crop.avatar} className="w-7 h-7 rounded-full"/><span className="text-[13px] font-bold hover:underline">{crop.farmer}</span><span className="text-[12px] text-slate-400">• {crop.city}</span></div>
-        <h3 className="font-bold text-[16px] mb-1">{crop.name}</h3>
+        <Link href={`/crop/${crop.id}`}><h3 className="font-bold text-[16px] mb-1 hover:underline cursor-pointer">{crop.name}</h3></Link>
         <div className="flex justify-between items-center mt-3"><span className="text-sm font-bold text-emerald-700">{crop.price}</span><span className="text-[12px] bg-slate-50 px-2.5 py-1 rounded-full">{crop.qty}</span></div>
         <div className="flex gap-4 mt-4 pt-3 border-t text-sm text-slate-600">
           <button onClick={()=>onLike(crop.id)} className={`${crop.liked?"text-red-500":""} font-bold`}>❤️ {crop.likes}</button>
