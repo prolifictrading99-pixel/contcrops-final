@@ -23,6 +23,7 @@ export default function CropDetailPage(){
   const id = Number(params.id)
   const crop = CROPS_MOCK.find(c=>c.id===id) || CROPS_MOCK[0]
   const farmer = COLLEAGUES_MOCK.find(f=>f.id===crop.farmer_id) || COLLEAGUES_MOCK[0]
+
   const [liked, setLiked] = useState(false)
   const [likes, setLikes] = useState(crop.likes)
   const [toast, setToast] = useState("")
@@ -31,12 +32,15 @@ export default function CropDetailPage(){
     {id:1, name:"محمد", avatar:"https://i.pravatar.cc/100?img=8", text:"الجودة ممتازة، تعاملت معاه قبل كده", time:"منذ ساعتين"},
     {id:2, name:"فاطمة", avatar:"https://i.pravatar.cc/100?img=26", text:"لسه متاح؟", time:"منذ 3 ساعات"},
   ])
+
   const showToast = (msg:string)=>{ setToast(msg); setTimeout(()=>setToast(""),2500) }
+
   const handleContact = ()=>{
     localStorage.setItem("contcrops_chat_with", JSON.stringify(farmer))
     localStorage.setItem("contcrops_chat_crop", JSON.stringify(crop))
     router.push("/?chat="+farmer.id)
   }
+
   return (
     <div dir="rtl" className="min-h-screen bg-[#f8fafc]">
       <header className="sticky top-0 z-50 bg-white border-b border-slate-100">
@@ -49,21 +53,22 @@ export default function CropDetailPage(){
           </div>
         </div>
       </header>
+
       <main className="max-w- mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
         <div className="space-y-5">
           <div className="bg-white rounded- border border-slate-100 overflow-hidden">
-            <div className="relative h- bg-slate-50">
-              <img src={crop.img} className="w-full h-full object-contain p-2"/>
+            <div className="relative h- bg-slate-50 flex items-center justify-center">
+              <img src={crop.img} className="w-auto h-full max-h- max-w- object-contain rounded-xl shadow-sm bg-white p-1"/>
               <div className="absolute top-4 right-4 flex gap-2">
-                <span className="px-3 py-1.5 bg-white/90 backdrop-blur rounded-full text-xs font-bold">{crop.category}</span>
-                {crop.verified && <span className="w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs">✓</span>}
+                <span className="px-3 py-1.5 bg-white/90 backdrop-blur rounded-full text-xs font-bold shadow-sm">{crop.category}</span>
+                {crop.verified && <span className="w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs shadow-sm">✓</span>}
               </div>
             </div>
             <div className="p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h1 className="text-2xl font-extrabold">{crop.name}</h1>
-                  <p className="text-sm text-slate-500 mt-1">📍 {crop.city} • {crop.qty} • منذ ساعتين</p>
+                  <p className="text-sm text-slate-500 mt-1 flex items-center gap-2">📍 {crop.city} • {crop.qty} • منذ ساعتين</p>
                 </div>
                 <div className="text-left">
                   <p className="text-2xl font-extrabold text-emerald-700">{crop.price}</p>
@@ -80,18 +85,18 @@ export default function CropDetailPage(){
                 </div>
               </div>
               <div className="flex gap-3 mt-6">
-                <button onClick={handleContact} className="flex-1 h-12 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800">تواصل مع المزارع 💬</button>
-                <button onClick={()=>showToast("تمت الإضافة للمفضلة")} className="h-12 px-6 bg-white border rounded-full font-bold">♡ حفظ</button>
+                <button onClick={handleContact} className="flex-1 h-12 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2">تواصل مع المزارع 💬</button>
+                <button onClick={()=>showToast("تمت الإضافة للمفضلة")} className="h-12 px-6 bg-white border rounded-full font-bold hover:bg-slate-50 transition">♡ حفظ</button>
               </div>
             </div>
           </div>
-          <div className="bg-white rounded- border p-6">
+          <div className="bg-white rounded- border border-slate-100 p-6">
             <h3 className="font-bold mb-4">التعليقات ({commentsList.length})</h3>
             <div className="flex gap-3 mb-5">
               <img src="https://i.pravatar.cc/100?img=12" className="w-9 h-9 rounded-full"/>
               <div className="flex-1 flex gap-2">
-                <input value={newComment} onChange={e=>setNewComment(e.target.value)} placeholder="اكتب تعليق..." className="flex-1 h-11 px-4 bg-slate-50 border rounded-full text-sm"/>
-                <button onClick={()=>{if(newComment.trim()){setCommentsList([{id:Date.now(), name:"أنت", avatar:"https://i.pravatar.cc/100?img=12", text:newComment, time:"الآن"},...commentsList]); setNewComment("")}}} className="h-11 px-5 bg-slate-900 text-white rounded-full text-sm font-bold">إرسال</button>
+                <input value={newComment} onChange={e=>setNewComment(e.target.value)} placeholder="اكتب تعليق..." className="flex-1 h-11 px-4 bg-slate-50 border border-slate-100 rounded-full text-sm outline-none focus:bg-white focus:border-emerald-300"/>
+                <button onClick={()=>{if(newComment.trim()){setCommentsList([{id:Date.now(), name:"أنت", avatar:"https://i.pravatar.cc/100?img=12", text:newComment, time:"الآن"},...commentsList]); setNewComment(""); showToast("تم نشر التعليق")}}} className="h-11 px-5 bg-slate-900 text-white rounded-full text-sm font-bold hover:bg-slate-800">إرسال</button>
               </div>
             </div>
             <div className="space-y-4">
@@ -108,32 +113,47 @@ export default function CropDetailPage(){
           </div>
         </div>
         <div className="space-y-5">
-          <div className="bg-white rounded- border overflow-hidden">
-            <div className="h-24 bg-slate-200 relative"><img src={farmer.cover} className="w-full h-full object-cover"/></div>
+          <div className="bg-white rounded- border border-slate-100 overflow-hidden">
+            <div className="h-24 bg-slate-200 relative"><img src={farmer.cover} className="w-full h-full object-cover"/><div className="absolute inset-0 bg-black/10"/></div>
             <div className="p-5">
               <div className="flex gap-3">
-                <Link href="/"><img src={farmer.avatar} className="w-14 h-14 rounded-full border-2 border-white -mt-10"/></Link>
+                <Link href="/"><img src={farmer.avatar} className="w-14 h-14 rounded-full border-2 border-white -mt-10 cursor-pointer hover:opacity-80"/></Link>
                 <div className="flex-1 -mt-1">
                   <Link href="/" className="font-extrabold hover:underline">{farmer.name}</Link>
                   <p className="text-xs text-slate-500">{farmer.city} • {farmer.specialty}</p>
                 </div>
                 <span className="w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-">✓</span>
               </div>
-              <p className="text- text-slate-600 mt-3">{farmer.bio}</p>
+              <p className="text- text-slate-600 mt-3 leading-6">{farmer.bio}</p>
               <div className="flex gap-4 mt-4 text-">
                 <span><b>{farmer.crops}</b> محصول</span>
                 <span><b>{farmer.followers}</b> متابع</span>
                 <span>⭐ {farmer.rating}</span>
               </div>
               <div className="flex gap-2 mt-5">
-                <button onClick={handleContact} className="flex-1 h-10 bg-slate-900 text-white rounded-full text-sm font-bold">مراسلة 💬</button>
-                <Link href="/" className="flex-1 h-10 bg-white border rounded-full text-sm font-bold flex items-center justify-center">عرض البروفايل</Link>
+                <button onClick={handleContact} className="flex-1 h-10 bg-slate-900 text-white rounded-full text-sm font-bold hover:bg-slate-800 transition">مراسلة 💬</button>
+                <Link href="/" className="flex-1 h-10 bg-white border border-slate-200 rounded-full text-sm font-bold flex items-center justify-center hover:bg-slate-50">عرض البروفايل</Link>
               </div>
             </div>
           </div>
+          <div className="bg-white rounded- border border-slate-100 p-5">
+            <h3 className="font-bold text-sm mb-3">محاصيل أخرى من نفس المزارع</h3>
+            <div className="space-y-3">
+              {CROPS_MOCK.filter(c=>c.farmer_id===farmer.id && c.id!==crop.id).concat(CROPS_MOCK.slice(0,2)).slice(0,3).map(c=>(
+                <Link key={c.id} href={`/crop/${c.id}`} className="flex gap-3 p-2 hover:bg-slate-50 rounded-xl transition">
+                  <img src={c.img} className="w-14 h-14 rounded-xl object-cover"/>
+                  <div><p className="text- font-bold">{c.name}</p><p className="text-xs text-slate-500">{c.city} • {c.price}</p></div>
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div className="bg-emerald-50 rounded- border border-emerald-100 p-5">
+            <p className="text-sm font-bold text-emerald-800">💡 نصيحة</p>
+            <p className="text-xs text-emerald-700 mt-2 leading-6">تواصل مع المزارع مباشرة عبر الرسائل للاتفاق على السعر والكمية وطريقة النقل.</p>
+          </div>
         </div>
       </main>
-      {toast && <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-bold z-[90]">{toast}</div>}
+      {toast && <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-bold z-[90] shadow-lg">{toast}</div>}
     </div>
   )
 }
