@@ -3,6 +3,26 @@
 @tailwind utilities;
 
 * { font-family: 'Tajawal', sans-serif; }
-body { background: #f8fafc; }
+html { scroll-behavior: smooth; }
+body { background: #f7f8f3; color: #17251d; }
+button, input, textarea, select { font: inherit; }
+button { transition: background-color .18s ease, color .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid rgba(34, 120, 78, .3); outline-offset: 2px; }
+::selection { background: #d5efdc; color: #173d2a; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+.auth-shell {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(223, 238, 217, .7), transparent 28rem),
+    #f4f6ef;
+}
+
+.auth-visual {
+  background:
+    linear-gradient(180deg, rgba(10, 43, 28, .12) 0%, rgba(10, 43, 28, .82) 100%),
+    url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1400&auto=format&fit=crop&q=85") center / cover;
+}
+
+.crop-card-image img { transition: transform .45s ease; }
+.crop-card-image:hover img { transform: scale(1.045); }
