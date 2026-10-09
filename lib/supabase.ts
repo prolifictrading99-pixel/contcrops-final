@@ -16,8 +16,9 @@ const isConfigured = !!supabaseUrl && !!supabaseKey && supabaseUrl.includes('sup
 
 export const supabase = createClient(finalUrl, finalKey, {
   auth: {
-    persistSession: false,
-    autoRefreshToken: false,
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
   }
 })
 
