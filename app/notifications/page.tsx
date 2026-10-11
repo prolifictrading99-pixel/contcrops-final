@@ -1,74 +1,92 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { filterPeerNotifications, loadPeerNotifications, type ActivityNotification } from "@/lib/notifications";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { CheckCheck, Trash2 } from "lucide-react";
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [filter, setFilter] = useState("الكل");
+  const [notifications, setNotifications] = useState<ActivityNotification[]>([]);
+  const [filter, setFilter] = useState("all");
+  const [accountId, setAccountId] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(()=>{
-    const saved = JSON.parse(localStorage.getItem("contcrops_notifications") || "[]");
-    if (saved.length === 0) {
-      // إشعارات تجريبية أول مرة
-      const demo = [
-        { id: 1, type: "like", from: "الحاج سعيد", text: "أعجب بمنشورك: طماطم بلدي - 2 طن", time: "منذ 5 دقائق", read: false },
-        { id: 2, type: "comment", from: "مزرعة النور", text: "علق على منشورك: السعر كام يا غالي؟", time: "منذ ساعة", read: false },
-        { id: 3, type: "follow", from: "أبو خالد", text: "بدأ يتابعك - تابعه عشان تشوف منشوراته", time: "منذ 3 ساعات", read: false },
-        { id: 4, type: "like", from: "الحاج سعيد", text: "أعجب بثريدك: نصيحة عن الكالسيوم", time: "أمس", read: true },
-      ];
-      setNotifications(demo);
-      localStorage.setItem("contcrops_notifications", JSON.stringify(demo));
-    } else {
-      setNotifications(saved);
-    }
+    let active = true;
+    const load = async () => {
+      let userId = "";
+      try {
+        const { data } = await supabase.auth.getSession();
+        userId = data.session?.user.id || "";
+      } catch (error) {
+        console.error("Could not load notification session", error);
+      }
+      if (!userId) {
+        const demoId = localStorage.getItem("contcrops_demo_session");
+        const savedUser = demoId ? localStorage.getItem(`contcrops_demo_user:${demoId}`) : null;
+        try { userId = savedUser ? String(JSON.parse(savedUser)?.id || "") : ""; }
+        catch (error) { console.error("Could not load local notification account", error); }
+      }
+      if (!active) return;
+      setAccountId(userId || null);
+      if (!userId) { setLoaded(true); return; }
+      let localNotifications: ActivityNotification[] = [];
+      try {
+        const account = JSON.parse(localStorage.getItem(`contcrops_account:${userId}`) || "{}");
+        localNotifications = filterPeerNotifications(account.notifications || [], userId);
+      } catch (error) {
+        console.error("Could not load local notifications", error);
+      }
+      const remoteNotifications = await loadPeerNotifications(userId);
+      if (!active) return;
+      setNotifications(filterPeerNotifications([...remoteNotifications, ...localNotifications], userId)
+        .filter((item, index, list) => list.findIndex(other => String(other.id) === String(item.id)) === index));
+      setLoaded(true);
+    };
+    void load();
+    return () => { active = false; };
   },[]);
+
+  const saveNotifications = (updated: ActivityNotification[]) => {
+    setNotifications(updated);
+    if (!accountId) return;
+    try {
+      const key = `contcrops_account:${accountId}`;
+      const account = JSON.parse(localStorage.getItem(key) || "{}");
+      localStorage.setItem(key, JSON.stringify({ ...account, notifications: updated }));
+    } catch (error) {
+      console.error("Could not save notification changes", error);
+    }
+  };
 
   const markAllRead = () => {
     const updated = notifications.map(n => ({ ...n, read: true }));
-    setNotifications(updated);
-    localStorage.setItem("contcrops_notifications", JSON.stringify(updated));
+    saveNotifications(updated);
+    if (accountId && isSupabaseConfigured()) void supabase.from("activity_notifications").update({ read: true }).eq("recipient_id", accountId);
   };
 
-  const markOneRead = (id: number) => {
-    const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
-    setNotifications(updated);
-    localStorage.setItem("contcrops_notifications", JSON.stringify(updated));
-  };
-
-  const deleteOne = (id: number) => {
-    const updated = notifications.filter(n => n.id !== id);
-    setNotifications(updated);
-    localStorage.setItem("contcrops_notifications", JSON.stringify(updated));
+  const markOneRead = (id: string | number) => {
+    const updated = notifications.map(n => String(n.id) === String(id) ? { ...n, read: true } : n);
+    saveNotifications(updated);
+    if (accountId && isSupabaseConfigured() && /^[0-9a-f-]{36}$/i.test(String(id))) {
+      void supabase.from("activity_notifications").update({ read: true }).eq("recipient_id", accountId).eq("id", String(id));
+    }
   };
 
   const clearAll = () => {
     if(confirm("تمسح كل الإشعارات؟")) {
-      setNotifications([]);
-      localStorage.setItem("contcrops_notifications", JSON.stringify([]));
+      saveNotifications([]);
+      if (accountId && isSupabaseConfigured()) void supabase.from("activity_notifications").delete().eq("recipient_id", accountId);
     }
   };
 
   const filtered = notifications.filter(n => {
-    if (filter === "الكل") return true;
-    if (filter === "غير مقروءة") return !n.read;
+    if (filter === "all") return true;
+    if (filter === "unread") return !n.read;
     return n.type === filter;
   });
 
   const unreadCount = notifications.filter(n => !n.read).length;
-
-  const getIcon = (type: string) => {
-    if (type === "like") return "❤️";
-    if (type === "comment") return "💬";
-    if (type === "follow") return "👥";
-    return "🔔";
-  };
-
-  const getColor = (type: string) => {
-    if (type === "like") return "bg-red-50 border-red-200";
-    if (type === "comment") return "bg-blue-50 border-blue-200";
-    if (type === "follow") return "bg-green-50 border-green-200";
-    return "bg-gray-50";
-  };
 
   return (
     <main dir="rtl" className="min-h-screen bg-[#f5f6f1]">

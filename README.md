@@ -23,7 +23,9 @@ NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 ```
 
-ثم نفذ `supabase/schema.sql` في SQL Editor
+نفّذ فقط `supabase/migrations/20261009_social_profiles_content.sql` في SQL Editor، ولا تشغّل `supabase/schema.sql` على قاعدة تحتوي بيانات لأنه مخطط قديم يعيد إنشاء الجداول. خطوات إعداد البيئة وتفعيل Google موضحة في `README_SUPABASE.md`.
+
+خيار الدخول التجريبي لا ينشئ حسابًا آمنًا؛ يخصص بيانات محلية حسب البريد على المتصفح نفسه فقط. تسجيل الدخول الحقيقي عبر Supabase يحفظ الملفات والعلاقات والمحتوى الموثق، بينما تبقى بعض الوظائف المحلية مثل الرسائل والإشعارات على هذا الجهاز.
 
 ## التصميم
 - Next.js 14.2.5

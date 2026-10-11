@@ -16,18 +16,15 @@ export default function AuthPage(){
       const {data,error} = await supabase.auth.signUp({email:form.email,password:form.password});
       if(error) alert(error.message);
       else {
-        await supabase.from("users_profiles").insert([{
-          user_id: data.user?.id,
-          email: form.email,
-          name: form.name,
-          role: form.role,
-          city: form.city,
-          phone: form.phone,
-          company_name: form.name,
-          specialty: form.role,
-          verified: false,
-          rating: 5
-        }]);
+        if (data.user) {
+          const { error: profileError } = await supabase.from("profiles").upsert({
+            id: data.user.id,
+            display_name: form.name,
+            city: form.city,
+            specialty: form.role
+          });
+          if (profileError) alert(profileError.message);
+        }
         alert("تم إنشاء الحساب! سجل دخول الآن");
         setIsLogin(true);
       }

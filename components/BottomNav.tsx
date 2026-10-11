@@ -21,7 +21,7 @@ export default function BottomNav(){
         <Link href="/farmers" className={`flex flex-col items-center ${pathname.startsWith("/farmers")? "text-green-600" : "text-gray-400"}`}>
           <span className="text-lg">🧑‍🌾</span><span className="text-">المجتمع</span>
         </Link>
-        <Link href="/dashboard" className={`flex flex-col items-center ${pathname.startsWith("/dashboard")? "text-green-600" : "text-gray-400"}`}>
+        <Link href="/admin" className={`flex flex-col items-center ${pathname.startsWith("/admin") || pathname.startsWith("/dashboard") ? "text-green-600" : "text-gray-400"}`}>
           <span className="text-lg">📊</span><span className="text-">لوحتي</span>
         </Link>
         <Link href="/messages" className={`flex flex-col items-center ${pathname.startsWith("/messages")? "text-green-600" : "text-gray-400"}`}>

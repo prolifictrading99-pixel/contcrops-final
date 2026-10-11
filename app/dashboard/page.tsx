@@ -1,116 +1,125 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { ArrowLeft, ClipboardList, FilePlus2, Leaf, UsersRound, Warehouse } from "lucide-react";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 
-export default function DashboardPage(){
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [stats, setStats] = useState({ users:0, crops:0, farmers:0 });
-  const [crops, setCrops] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+type Contract = {
+  id: string | number;
+  supplier: string;
+  crop: string;
+  quantity: number | string;
+  price: number | string;
+  delivery_date: string;
+  terms: string;
+  status: "active" | "review" | "cancelled" | string;
+  created_at?: string;
+};
 
-  useEffect(()=>{
-    const u = JSON.parse(localStorage.getItem("contcrops_user") || "null");
-    
-    if(!u){
-      router.push("/login");
-      return;
-    }
-    // حماية: لو مش أدمن رجعه بروفايله
-    if(u.role !== 'admin'){
-      router.push(`/users/${u.phone}`);
-      return;
-    }
-    
-    setUser(u);
+const LOCAL_CONTRACTS_KEY = "contcrops_contracts";
 
-    const loadData = async ()=>{
-      const { count: usersCount } = await supabase.from("profiles").select("*", {count:"exact", head:true});
-      const { count: cropsCount } = await supabase.from("crops").select("*", {count:"exact", head:true});
-      const { data: allCrops } = await supabase.from("crops").select("*").order("created_at", {ascending:false}).limit(20);
-      
-      const uniqueFarmers = new Set(allCrops?.map((c:any)=>c.farmer_phone)).size;
+function readLocalContracts(): Contract[] {
+  try {
+    const contracts = JSON.parse(localStorage.getItem(LOCAL_CONTRACTS_KEY) || "[]");
+    return Array.isArray(contracts) ? contracts : [];
+  } catch {
+    return [];
+  }
+}
 
-      setStats({ users: usersCount||0, crops: cropsCount||0, farmers: uniqueFarmers });
-      if(allCrops) setCrops(allCrops);
-      setLoading(false);
+export default function DashboardPage() {
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [loadMessage, setLoadMessage] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    const loadContracts = async () => {
+      if (isSupabaseConfigured()) {
+        const { data, error } = await supabase
+          .from("contracts")
+          .select("id,supplier,crop,quantity,price,delivery_date,terms,status,created_at")
+          .order("created_at", { ascending: false })
+          .limit(100);
+
+        if (!error && mounted) {
+          setContracts(data || []);
+          return;
+        }
+        if (error) {
+          console.error("Could not load contracts from Supabase", error);
+          if (mounted) setLoadMessage("تعذر تحميل العقود من Supabase؛ يتم عرض العقود المحفوظة على هذا الجهاز.");
+        }
+      }
+
+      if (mounted) setContracts(readLocalContracts());
     };
-    loadData();
-  },[]);
 
-  const deleteCrop = async (id:any)=>{
-    if(!confirm("متأكد عايز تمسح المحصول ده؟")) return;
-    await supabase.from("crops").delete().eq("id", id);
-    setCrops(crops.filter(c=>c.id !== id));
-  };
+    void loadContracts();
+    return () => { mounted = false; };
+  }, []);
 
-  const handleLogout = ()=>{
-    localStorage.removeItem("contcrops_user");
-    router.push("/login");
-  };
+  const stats = [
+    { label: "إجمالي العقود", value: contracts.length, icon: <ClipboardList size={18}/>, color: "text-[#064E3B]" },
+    { label: "عقود مفعلة", value: contracts.filter((contract) => contract.status === "active").length, icon: <Leaf size={18}/>, color: "text-emerald-700" },
+    { label: "قيد المراجعة", value: contracts.filter((contract) => contract.status === "review").length, icon: <Warehouse size={18}/>, color: "text-amber-600" },
+    { label: "ملغية", value: contracts.filter((contract) => contract.status === "cancelled").length, icon: <ClipboardList size={18}/>, color: "text-rose-600" },
+  ];
 
-  if(loading) return <div className="p-10 text-center">جاري تحميل لوحة الإدارة...</div>;
+  const quickLinks = [
+    { href: "/dashboard/contract", label: "كتابة عقد", detail: "إنشاء وحفظ عقد جديد", icon: <FilePlus2 size={19}/> },
+    { href: "/dashboard/contracts", label: "نماذج عقود", detail: "بيع وتوريد وإيجار مع معاينة وطباعة", icon: <ClipboardList size={19}/> },
+    { href: "#contracts", label: "عرض العقود", detail: "مراجعة أحدث العقود", icon: <ClipboardList size={19}/> },
+    { href: "/", label: "المحاصيل", detail: "استكشاف سوق المحاصيل", icon: <Leaf size={19}/> },
+    { href: "/admin/colleagues", label: "الزملاء", detail: "ملفات الزملاء المسجلة على المنصة", icon: <UsersRound size={19}/> },
+    { href: "/dashboard/statements?type=produce", label: "استلام / تسليم", detail: "إنشاء بيان حركة محصول أو منتج", icon: <Warehouse size={19}/> },
+    { href: "/dashboard/statements?type=cash", label: "بيان نقدية", detail: "إنشاء سند قبض أو صرف", icon: <FilePlus2 size={19}/> },
+  ];
 
   return (
-    <main dir="rtl" className="min-h-screen bg-gray-50 p-4 pb-20">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="bg-white border rounded-2xl p-4 flex justify-between items-center">
+    <main dir="rtl" className="min-h-screen bg-slate-50 p-4 pb-20 text-slate-900 sm:p-6">
+      <div className="mx-auto max-w-6xl">
+        <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
           <div>
-            <h1 className="font-black text-base">لوحة الإدارة 🛡️</h1>
-            <p className="text-xs text-gray-400">مرحباً {user?.name} - {user?.phone} (أدمن)</p>
+            <p className="text-xs font-bold text-emerald-800">ContCrops · إدارة التعاملات</p>
+            <h1 className="mt-1 text-xl font-black text-slate-900">لوحة التحكم</h1>
           </div>
-          <div className="flex gap-2">
-            <Link href="/" className="text-xs bg-gray-100 px-3 py-2 rounded-full">السوق</Link>
-            <button onClick={handleLogout} className="text-xs bg-red-50 text-red-600 border border-red-100 px-3 py-2 rounded-full">خروج</button>
-          </div>
-        </div>
+          <Link href="/" className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-900">العودة للمنصة <ArrowLeft size={15}/></Link>
+        </header>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mt-4">
-          <div className="bg-white border rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black">{stats.users}</p>
-            <p className="text-[11px] text-gray-400">إجمالي المستخدمين</p>
-          </div>
-          <div className="bg-white border rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black text-green-600">{stats.crops}</p>
-            <p className="text-[11px] text-gray-400">إجمالي المحاصيل</p>
-          </div>
-          <div className="bg-white border rounded-2xl p-4 text-center">
-            <p className="text-2xl font-black">{stats.farmers}</p>
-            <p className="text-[11px] text-gray-400">عدد المزارعين</p>
-          </div>
-        </div>
+        {loadMessage && <p role="status" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">{loadMessage}</p>}
 
-        {/* Latest Crops */}
-        <div className="bg-white border rounded-2xl mt-4 p-4">
-          <h2 className="font-black text-sm mb-3">آخر المحاصيل في السوق (التحكم)</h2>
-          <div className="space-y-2">
-            {crops.map((c:any)=>(
-              <div key={c.id} className="flex items-center justify-between border rounded-full px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <img src={c.image_url} className="w-8 h-8 rounded-full object-cover" />
-                  <div>
-                    <p className="text-xs font-bold">{c.name} - {c.price}ج</p>
-                    <p className="text-[10px] text-gray-400">{c.farmer_name} • {c.farmer_phone} • {c.city}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <Link href={`/crop/${c.id}`} className="text-[10px] bg-black text-white px-3 py-1 rounded-full">عرض</Link>
-                  <button onClick={()=>deleteCrop(c.id)} className="text-[10px] bg-red-50 text-red-600 border px-3 py-1 rounded-full">مسح</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <section aria-label="إحصائيات العقود" className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {stats.map((stat) => <article key={stat.label} className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-2"><p className="text-xs font-bold text-slate-500">{stat.label}</p><span className={stat.color}>{stat.icon}</span></div>
+            <p className={`mt-3 text-2xl font-black ${stat.color}`}>{stat.value}</p>
+          </article>)}
+        </section>
 
-        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-3 mt-4 text-[11px]">
-          <p className="font-bold">ملاحظة:</p>
-          <p>أي حساب role بتاعه مش admin لو دخل /dashboard هيتحول تلقائياً لـ /users/رقمه - يعني لوحة الإدارة للأدمن بس.</p>
-        </div>
+        <section className="mt-6">
+          <h2 className="mb-3 text-sm font-extrabold text-slate-800">الوصول السريع</h2>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {quickLinks.map((link) => <Link key={link.href} href={link.href} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50/50">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800">{link.icon}</span>
+              <span className="min-w-0"><span className="block text-sm font-extrabold text-slate-800">{link.label}</span><span className="mt-1 block text-[11px] leading-5 text-slate-500">{link.detail}</span></span>
+            </Link>)}
+          </div>
+        </section>
+
+        <section id="contracts" className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-100 p-4">
+            <div><h2 className="text-sm font-extrabold text-slate-900">أحدث العقود</h2><p className="mt-1 text-[11px] text-slate-500">{contracts.length} عقد محفوظ</p></div>
+            <Link href="/dashboard/contract" className="rounded-lg bg-[#064E3B] px-3 py-2 text-xs font-bold text-white hover:bg-emerald-900">كتابة عقد</Link>
+          </div>
+          {contracts.length ? <div className="divide-y divide-slate-100">
+            {contracts.slice(0, 8).map((contract) => <article key={contract.id} className="grid gap-2 px-4 py-3 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
+              <div><p className="text-xs font-bold text-slate-800">{contract.crop} · {contract.supplier}</p><p className="mt-1 text-[10px] text-slate-500">{contract.quantity} · {contract.delivery_date || "موعد غير محدد"}</p></div>
+              <p className="text-xs font-bold text-emerald-800">{Number(contract.price).toLocaleString("ar-EG")} جنيه</p>
+              <span className="w-fit rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">{contract.status === "active" ? "مفعل" : contract.status === "cancelled" ? "ملغي" : "قيد المراجعة"}</span>
+            </article>)}
+          </div> : <p className="px-4 py-10 text-center text-xs text-slate-500">لا توجد عقود بعد. ابدأ بإنشاء عقد جديد.</p>}
+        </section>
       </div>
     </main>
-  )
+  );
 }

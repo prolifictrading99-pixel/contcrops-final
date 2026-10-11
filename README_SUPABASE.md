@@ -1,44 +1,18 @@
-# ContCrops 🌿 - مربوط بـ Supabase
+# إعداد Supabase في ContCrops
 
-## نفس التصميم 100% + مربوط بـ Supabase
+يمكن تشغيل الواجهة ببيانات تجريبية من دون Supabase. عند إعداد مشروع Supabase، تدعم المنصة تسجيل الدخول، والملفات الشخصية، وعلاقات «مهتم»، ومزامنة المقالات والمحاصيل وطلبات الشراء والنقاشات للحسابات الموثقة.
 
-### المميزات الجديدة:
-- ✅ صورة المحصول صغرت من 420px لـ 260px + object-contain
-- ✅ زرار المراسلة شغال 100% بين الزملاء
-- ✅ مربوط بـ Supabase: crops, colleagues, discussions, messages, comments, follows, likes
-- ✅ فلتر: الكل - فريش - مجمد - مجفف - محطات فرز وتعبئة - مستلزمات زراعة - مستلزمات انتاج - نقل ولوجيستك
-- ✅ نفس التصميم rounded-[24px]
+## الإعداد
 
-### خطوات ربط Supabase:
+1. أنشئ مشروع Supabase، ثم افتح SQL Editor وشغّل **فقط** `supabase/migrations/20261009_social_profiles_content.sql`.
+2. لا تشغّل `supabase/schema.sql` على قاعدة تحتوي بيانات؛ فهو مخطط قديم يعيد إنشاء جداول وقد يحذفها.
+3. انسخ `.env.local.example` إلى `.env.local` وأضف عنوان المشروع ومفتاح `anon`:
 
-1. روح https://supabase.com واعمل مشروع جديد
-2. افتح SQL Editor والصق محتوى ملف `supabase/schema.sql` وشغله
-3. انسخ .env.example لـ .env.local وحط بياناتك:
-```
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
-4. شغل:
-```
-npm install
-npm run dev
-```
 
-لو مفيش .env.local المنصة هتشتغل بـ MOCK DATA عادي.
+4. أعد تشغيل خادم التطوير بعد تغيير متغيرات البيئة. لتفعيل Google، أضف بيانات مزوّد Google وعنوان إعادة التوجيه في إعدادات Authentication لدى Supabase.
 
-### تحديث GitHub:
-
-```bash
-chmod +x update-github.sh
-./update-github.sh
-
-# اول مرة:
-git remote add origin https://github.com/YOUR_USERNAME/contcrops-final.git
-git branch -M main
-git push -u origin main
-
-# بعد كده:
-git add .
-git commit -m "update"
-git push
-```
+ترحيل الملفات والعلاقات والمحتوى يستخدم سياسات RLS؛ لا تضع مفتاح `service_role` في متغيرات الواجهة. لا تُزامَن بيانات الحسابات التجريبية أو حسابات الزملاء الوهمية إلى Supabase. تبقى بعض الوظائف المحلية مثل المحادثات والإشعارات على التخزين المحلي إلى أن تُجهّز جداولها وسياساتها.
