@@ -73,6 +73,26 @@ export default function NotificationsPage() {
     }
   };
 
+  const deleteOne = (id: string | number) => {
+    const updated = notifications.filter(n => String(n.id) !== String(id));
+    saveNotifications(updated);
+    if (accountId && isSupabaseConfigured() && /^[0-9a-f-]{36}$/i.test(String(id))) {
+      void supabase.from("activity_notifications").delete().eq("recipient_id", accountId).eq("id", String(id));
+    }
+  };
+
+  const getColor = (type: string) => {
+    if (type === "like") return "bg-red-50 border-red-100";
+    if (type === "comment") return "bg-blue-50 border-blue-100";
+    return "bg-green-50 border-green-100";
+  };
+
+  const getIcon = (type: string) => {
+    if (type === "like") return "❤️";
+    if (type === "comment") return "💬";
+    return "👥";
+  };
+
   const clearAll = () => {
     if(confirm("تمسح كل الإشعارات؟")) {
       saveNotifications([]);
@@ -102,8 +122,8 @@ export default function NotificationsPage() {
         <div className="bg-white rounded-[16px] border border-black/5 p-3 flex items-center justify-between">
           <div className="flex gap-2 flex-wrap">
             {[
-              { label: "الكل", value: "الكل" },
-              { label: `غير مقروءة (${unreadCount})`, value: "غير مقروءة" },
+              { label: "الكل", value: "all" },
+              { label: `غير مقروءة (${unreadCount})`, value: "unread" },
               { label: "❤️ إعجابات", value: "like" },
               { label: "💬 تعليقات", value: "comment" },
               { label: "👥 متابعات", value: "follow" },
