@@ -143,7 +143,7 @@ export async function loadPeerNotifications(userId?: string | number | null) {
     .order("created_at", { ascending: false })
     .limit(40)
   if (error) {
-    console.error("Could not load notifications", error)
+    console.error("Could not load activity_notifications", error)
     return []
   }
   return filterPeerNotifications(data || [], userId)
