@@ -9,25 +9,46 @@ export default function AuthPage(){
 
   async function handleSubmit(e:any){
     e.preventDefault(); setLoading(true);
-    if(isLogin){
-      const {error} = await supabase.auth.signInWithPassword({email:form.email,password:form.password});
-      if(error) alert(error.message); else window.location.href="/profile";
-    }else{
-      const {data,error} = await supabase.auth.signUp({email:form.email,password:form.password});
-      if(error) alert(error.message);
-      else {
+    try {
+      if(isLogin){
+        const {error} = await supabase.auth.signInWithPassword({email:form.email,password:form.password});
+        if(error) throw error;
+        window.location.href="/";
+      }else{
+        const {data,error} = await supabase.auth.signUp({email:form.email,password:form.password});
+        if(error) throw error;
+
         if (data.user) {
-          const { error: profileError } = await supabase.from("profiles").upsert({
+          // جرب profiles الأول، لو مش موجود جرب colleagues
+          const profileData = {
             id: data.user.id,
             display_name: form.name,
+            name: form.name,
             city: form.city,
-            specialty: form.role
-          });
-          if (profileError) alert(profileError.message);
+            specialty: form.role,
+            phone: form.phone,
+            role: form.role,
+          };
+
+          let { error: profileError } = await supabase.from("profiles").upsert(profileData);
+          if (profileError) {
+            // لو profiles مش موجود، جرب colleagues
+            console.log("profiles failed, trying colleagues", profileError.message);
+            const { error: colleagueError } = await supabase.from("colleagues").insert({
+              id: undefined, // bigserial auto
+              name: form.name,
+              city: form.city,
+              specialty: form.role,
+              phone: form.phone,
+            });
+            if (colleagueError) throw colleagueError;
+          }
         }
-        alert("تم إنشاء الحساب! سجل دخول الآن");
+        alert("تم إنشاء الحساب! سجل دخول الآن ✅");
         setIsLogin(true);
       }
+    } catch (err:any) {
+      alert(err.message);
     }
     setLoading(false);
   }
@@ -58,7 +79,7 @@ export default function AuthPage(){
               </div>
             </>
           )}
-          <button disabled={loading} className="w-full bg-green-600 text-white py-3 rounded-xl font-bold">{loading?"جاري..." : isLogin?"دخول":"إنشاء حساب"}</button>
+          <button disabled={loading} className="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700">{loading?"جاري..." : isLogin?"دخول":"إنشاء حساب"}</button>
         </form>
         <button onClick={()=>setIsLogin(!isLogin)} className="w-full text-center text-sm text-green-600 font-bold mt-4">{isLogin?"معندكش حساب؟ سجل جديد":"عندك حساب؟ سجل دخول"}</button>
         <a href="/" className="block text-center text-xs text-gray-400 mt-3">← الرجوع للسوق</a>
