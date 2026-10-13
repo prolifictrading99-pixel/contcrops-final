@@ -6,8 +6,7 @@ const supabaseKey =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 
   ''
 
-// Valid dummy JWT for build - won't work for real requests but won't crash build
-const DUMMY_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDM0NjQzOTIsImV4cCI6MTk1OTA0MDM5Mn0.fake-signature'
+const DUMMY_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.[STRIPPED 115 bytes].fake-signature'
 
 const finalUrl = supabaseUrl || 'https://placeholder.supabase.co'
 const finalKey = supabaseKey || DUMMY_KEY
