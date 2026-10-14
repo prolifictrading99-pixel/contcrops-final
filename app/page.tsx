@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { BarChart3, BookOpen, Bookmark, ClipboardList, CircleUserRound, Heart, ImagePlus, Leaf, LogOut, MapPin, MessageCircle, MessageSquare, MoreHorizontal, Package, Search, Settings, Share2, ShieldCheck, Sprout, Store, TrendingUp, UsersRound, X } from "lucide-react"
+import { ActivityNotification } from "@/lib/notifications"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import { CropPriceTicker } from "@/components/CropPriceTicker"
 import { StoriesRail } from "@/components/Stories"
