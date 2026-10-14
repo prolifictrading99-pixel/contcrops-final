@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ClipboardList, FilePlus2, Leaf, UsersRound, Warehouse } from "lucide-react";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { supabase, isPlaceholderMode } from "@/lib/supabase";
 
 type Contract = {
   id: string | number;
@@ -21,8 +21,9 @@ const LOCAL_CONTRACTS_KEY = "contcrops_contracts";
 
 function readLocalContracts(): Contract[] {
   try {
+    if (typeof window === 'undefined') return [];
     const contracts = JSON.parse(localStorage.getItem(LOCAL_CONTRACTS_KEY) || "[]");
-    return Array.isArray(contracts) ? contracts : [];
+    return Array.isArray(contracts)? contracts : [];
   } catch {
     return [];
   }
@@ -35,21 +36,25 @@ export default function DashboardPage() {
   useEffect(() => {
     let mounted = true;
     const loadContracts = async () => {
-      if (isSupabaseConfigured()) {
+      // لو Supabase متظبط - استخدمه
+      if (!isPlaceholderMode()) {
         const { data, error } = await supabase
-          .from("contracts")
-          .select("id,supplier,crop,quantity,price,delivery_date,terms,status,created_at")
-          .order("created_at", { ascending: false })
-          .limit(100);
+         .from("contracts")
+         .select("id,supplier,crop,quantity,price,delivery_date,terms,status,created_at")
+         .order("created_at", { ascending: false })
+         .limit(100);
 
         if (!error && mounted) {
           setContracts(data || []);
+          setLoadMessage(""); // شيل رسالة الخطأ لو نجح
           return;
         }
         if (error) {
-          console.error("Could not load contracts from Supabase", error);
-          if (mounted) setLoadMessage("تعذر تحميل العقود من Supabase؛ يتم عرض العقود المحفوظة على هذا الجهاز.");
+          console.error("Could not load contracts", error);
+          if (mounted) setLoadMessage("تعذر تحميل بعض بيانات الإدارة من Supabase. تأكد من تطبيق ترحيل 20261011 ومن صلاحيات المالك.");
         }
+      } else {
+        if (mounted) setLoadMessage("وضع محلي - Supabase غير مُكوّن. يتم عرض العقود المحفوظة على هذا الجهاز.");
       }
 
       if (mounted) setContracts(readLocalContracts());
@@ -61,9 +66,9 @@ export default function DashboardPage() {
 
   const stats = [
     { label: "إجمالي العقود", value: contracts.length, icon: <ClipboardList size={18}/>, color: "text-[#064E3B]" },
-    { label: "عقود مفعلة", value: contracts.filter((contract) => contract.status === "active").length, icon: <Leaf size={18}/>, color: "text-emerald-700" },
-    { label: "قيد المراجعة", value: contracts.filter((contract) => contract.status === "review").length, icon: <Warehouse size={18}/>, color: "text-amber-600" },
-    { label: "ملغية", value: contracts.filter((contract) => contract.status === "cancelled").length, icon: <ClipboardList size={18}/>, color: "text-rose-600" },
+    { label: "عقود مفعلة", value: contracts.filter((c) => c.status === "active").length, icon: <Leaf size={18}/>, color: "text-emerald-700" },
+    { label: "قيد المراجعة", value: contracts.filter((c) => c.status === "review").length, icon: <Warehouse size={18}/>, color: "text-amber-600" },
+    { label: "ملغية", value: contracts.filter((c) => c.status === "cancelled").length, icon: <ClipboardList size={18}/>, color: "text-rose-600" },
   ];
 
   const quickLinks = [
@@ -101,21 +106,21 @@ export default function DashboardPage() {
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {quickLinks.map((link) => <Link key={link.href} href={link.href} className="flex min-h-24 items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50/50">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800">{link.icon}</span>
-              <span className="min-w-0"><span className="block text-sm font-extrabold text-slate-800">{link.label}</span><span className="mt-1 block text-[11px] leading-5 text-slate-500">{link.detail}</span></span>
+              <span className="min-w-0"><span className="block text-sm font-extrabold text-slate-800">{link.label}</span><span className="mt-1 block text- leading-5 text-slate-500">{link.detail}</span></span>
             </Link>)}
           </div>
         </section>
 
         <section id="contracts" className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 p-4">
-            <div><h2 className="text-sm font-extrabold text-slate-900">أحدث العقود</h2><p className="mt-1 text-[11px] text-slate-500">{contracts.length} عقد محفوظ</p></div>
+            <div><h2 className="text-sm font-extrabold text-slate-900">أحدث العقود</h2><p className="mt-1 text- text-slate-500">{contracts.length} عقد محفوظ</p></div>
             <Link href="/dashboard/contract" className="rounded-lg bg-[#064E3B] px-3 py-2 text-xs font-bold text-white hover:bg-emerald-900">كتابة عقد</Link>
           </div>
-          {contracts.length ? <div className="divide-y divide-slate-100">
+          {contracts.length? <div className="divide-y divide-slate-100">
             {contracts.slice(0, 8).map((contract) => <article key={contract.id} className="grid gap-2 px-4 py-3 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
-              <div><p className="text-xs font-bold text-slate-800">{contract.crop} · {contract.supplier}</p><p className="mt-1 text-[10px] text-slate-500">{contract.quantity} · {contract.delivery_date || "موعد غير محدد"}</p></div>
+              <div><p className="text-xs font-bold text-slate-800">{contract.crop} · {contract.supplier}</p><p className="mt-1 text- text-slate-500">{contract.quantity} · {contract.delivery_date || "موعد غير محدد"}</p></div>
               <p className="text-xs font-bold text-emerald-800">{Number(contract.price).toLocaleString("ar-EG")} جنيه</p>
-              <span className="w-fit rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700">{contract.status === "active" ? "مفعل" : contract.status === "cancelled" ? "ملغي" : "قيد المراجعة"}</span>
+              <span className="w-fit rounded-full bg-amber-50 px-2.5 py-1 text- font-bold text-amber-700">{contract.status === "active"? "مفعل" : contract.status === "cancelled"? "ملغي" : "قيد المراجعة"}</span>
             </article>)}
           </div> : <p className="px-4 py-10 text-center text-xs text-slate-500">لا توجد عقود بعد. ابدأ بإنشاء عقد جديد.</p>}
         </section>
