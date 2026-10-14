@@ -1,4 +1,4 @@
-// lib/supabase.ts - النسخة الصحيحة لـ ContCrops + لوحة التحكم
+// lib/supabase.ts - النسخة النهائية لـ ContCrops
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
@@ -11,19 +11,24 @@ export const isPlaceholderMode = () => {
   return !supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')
 }
 
+// للتوافق مع الملفات القديمة زي /admin/colleagues
+export const isSupabaseConfigured = () => !isPlaceholderMode()
+export const isConfigured = () => !isPlaceholderMode()
+
 const isPlaceholder = isPlaceholderMode()
 
-// 1. العميل العادي - للمنصة العامة (بيستخدم anon key)
+// 1. العميل العادي - للمنصة العامة (anon key)
 export const supabase: SupabaseClient = isPlaceholder
   ? createClient('https://placeholder.supabase.co', 'placeholder-key')
   : createClient(supabaseUrl, supabaseAnonKey)
 
-// 2. عميل الأدمن - للوحة التحكم فقط (بيستخدم service_role key) 🔑
-// ده اللي هيحل رسالة "تعذر تحميل بعض بيانات الإدارة"
+// 2. عميل الأدمن - للوحة التحكم فقط (service_role key) 🔑
 export const supabaseAdmin: SupabaseClient = (() => {
   if (isPlaceholder || !supabaseServiceRoleKey) {
-    console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY ناقص - لوحة التحكم مش هتشتغل')
-    return supabase // fallback مؤقت
+    if (typeof window === 'undefined') {
+      console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY ناقص - لوحة التحكم مش هتشتغل')
+    }
+    return supabase
   }
   return createClient(supabaseUrl, supabaseServiceRoleKey, {
     auth: {
@@ -33,5 +38,4 @@ export const supabaseAdmin: SupabaseClient = (() => {
   })
 })()
 
-// للتوافق مع الكود القديم
 export default supabase
