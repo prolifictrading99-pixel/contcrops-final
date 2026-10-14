@@ -1,99 +1,37 @@
-// supabase.ts - ContCrops - إعداد احترافي
+// lib/supabase.ts - النسخة الصحيحة لـ ContCrops + لوحة التحكم
+
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-// قراءة متغيرات البيئة
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY // للسيرفر فقط - لا تستخدمه في الكلاينت
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
-// قيم وهمية للبيلد فقط - لا تستخدم في الإنتاج
-const PLACEHOLDER_URL = 'https://placeholder.supabase.co'
-const PLACEHOLDER_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder-key-for-build-only'
-
-// تحقق احترافي من الإعداد
-const isConfigured = Boolean(supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('placeholder'))
-
-if (!isConfigured) {
-  if (typeof window === 'undefined') {
-    // سيرفر - تحذير في البيلد
-    console.warn('⚠️ [Supabase] متغيرات البيئة غير موجودة - تأكد من إعداد Vercel Env Variables')
-    console.warn('   المطلوب: NEXT_PUBLIC_SUPABASE_URL و NEXT_PUBLIC_SUPABASE_ANON_KEY')
-  } else {
-    // كلاينت - تحذير في المتصفح
-    console.warn('⚠️ [Supabase] غير مهيأ - بعض الخدمات قد لا تعمل')
-  }
+// هل المتغيرات ناقصة؟ (عشان Vercel Build ما يقعش)
+export const isPlaceholderMode = () => {
+  return !supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('placeholder')
 }
 
-// القيم النهائية مع fallback آمن للبيلد
-const finalUrl = supabaseUrl || PLACEHOLDER_URL
-const finalKey = supabaseAnonKey || PLACEHOLDER_KEY
+const isPlaceholder = isPlaceholderMode()
 
-// إنشاء العميل الأساسي (للاستخدام في الكلاينت)
-export const supabase: SupabaseClient = createClient(finalUrl, finalKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
-  },
-  // إعدادات إضافية للاستقرار
-  db: {
-    schema: 'public',
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'contcrops-web',
-    },
-  },
-})
+// 1. العميل العادي - للمنصة العامة (بيستخدم anon key)
+export const supabase: SupabaseClient = isPlaceholder
+  ? createClient('https://placeholder.supabase.co', 'placeholder-key')
+  : createClient(supabaseUrl, supabaseAnonKey)
 
-// عميل السيرفر (للاستخدام في API Routes و Server Components فقط)
-// يستخدم Service Role Key - صلاحيات أعلى
-export const supabaseAdmin: SupabaseClient | null = (() => {
-  if (typeof window !== 'undefined') {
-    // لا تنشئ admin client في المتصفح أبداً
-    return null
+// 2. عميل الأدمن - للوحة التحكم فقط (بيستخدم service_role key) 🔑
+// ده اللي هيحل رسالة "تعذر تحميل بعض بيانات الإدارة"
+export const supabaseAdmin: SupabaseClient = (() => {
+  if (isPlaceholder || !supabaseServiceRoleKey) {
+    console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY ناقص - لوحة التحكم مش هتشتغل')
+    return supabase // fallback مؤقت
   }
-  if (!supabaseUrl || !supabaseServiceKey) {
-    return null
-  }
-  return createClient(supabaseUrl, supabaseServiceKey, {
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
     auth: {
-      persistSession: false,
       autoRefreshToken: false,
+      persistSession: false,
     },
   })
 })()
 
-// دوال مساعدة احترافية
-
-/**
- * هل Supabase مهيأ بشكل صحيح؟
- */
-export const isSupabaseConfigured = (): boolean => {
-  return isConfigured
-}
-
-/**
- * هل نحن في وضع البيلد الوهمي؟
- */
-export const isPlaceholderMode = (): boolean => {
-  return finalUrl.includes('placeholder') || finalKey.includes('placeholder')
-}
-
-/**
- * احصل على معلومات الاتصال (للت debugging)
- */
-export const getSupabaseStatus = () => {
-  return {
-    configured: isConfigured,
-    placeholder: isPlaceholderMode(),
-    url: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'غير موجود',
-    hasAnonKey: !!supabaseAnonKey,
-    hasServiceKey: !!supabaseServiceKey,
-    environment: process.env.NODE_ENV,
-  }
-}
-
-// تصدير افتراضي أيضاً
+// للتوافق مع الكود القديم
 export default supabase
